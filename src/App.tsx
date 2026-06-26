@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './App.css';
 import { getNumbers } from './utils';
 import { Pagination } from './components/Pagination/Pagination';
@@ -6,39 +7,13 @@ import { Pagination } from './components/Pagination/Pagination';
 const items = getNumbers(1, 42).map(n => `Item ${n}`);
 
 export const App: React.FC = () => {
-  const getParamsFromUrl = () => {
-    const params = new URLSearchParams(window.location.search);
-    const page = Number(params.get('page')) || 1;
-    const perPage = Number(params.get('perPage')) || 5;
+  const [searchParams, setSearchParams] = useSearchParams();
 
-    return { page, perPage };
-  };
+  const perPage = Number(searchParams.get('perPage')) || 5;
+  const rawPage = Number(searchParams.get('page')) || 1;
 
-  const [{ page: currentPage, perPage }, setQueryParams] =
-    useState(getParamsFromUrl);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setQueryParams(getParamsFromUrl());
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const updateUrlParams = (pageValue: number, perPageValue: number) => {
-    const params = new URLSearchParams();
-
-    params.set('page', String(pageValue));
-    params.set('perPage', String(perPageValue));
-
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-
-    window.history.pushState({}, '', newUrl);
-
-    setQueryParams({ page: pageValue, perPage: perPageValue });
-  };
+  const totalPages = Math.ceil(items.length / perPage);
+  const currentPage = Math.max(1, Math.min(rawPage, totalPages));
 
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
@@ -48,13 +23,17 @@ export const App: React.FC = () => {
   const endItemNum = Math.min(indexOfLastItem, items.length);
 
   const handlePerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newPerPage = Number(event.target.value);
-
-    updateUrlParams(1, newPerPage);
+    setSearchParams({
+      page: '1',
+      perPage: event.target.value,
+    });
   };
 
   const handlePageChange = (page: number) => {
-    updateUrlParams(page, perPage);
+    setSearchParams({
+      page: String(page),
+      perPage: String(perPage),
+    });
   };
 
   return (
