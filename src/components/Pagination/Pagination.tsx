@@ -14,10 +14,8 @@ export const Pagination: React.FC<Props> = ({
   currentPage = 1,
   onPageChange,
 }) => {
-  // Рахуємо загальну кількість сторінок
   const totalPages = Math.ceil(total / perPage);
 
-  // Якщо сторінка всього одна або їх немає, пагінацію можна не показувати (або показувати 1 сторінку)
   const pages = getNumbers(1, totalPages);
 
   const handlePageClick = (
