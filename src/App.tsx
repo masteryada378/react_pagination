@@ -6,23 +6,19 @@ import { Pagination } from './components/Pagination/Pagination';
 const items = getNumbers(1, 42).map(n => `Item ${n}`);
 
 export const App: React.FC = () => {
-  // Функція для зчитування параметрів прямо з URL
   const getParamsFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
     const perPageValue = Number(params.get('perPage')) || 5;
     const rawPage = Number(params.get('page')) || 1;
 
-    // Валідація (clamping) сторінки, про яку просив ментор
     const totalPages = Math.ceil(items.length / perPageValue) || 1;
     const pageValue = Math.max(1, Math.min(rawPage, totalPages));
 
     return { page: pageValue, perPage: perPageValue };
   };
 
-  // Єдиний стейт для синхронізації з URL
   const [{ page, perPage }, setQueryParams] = useState(getParamsFromUrl);
 
-  // Слухаємо кнопку "Назад/Вперед" у браузері
   useEffect(() => {
     const handlePopState = () => {
       setQueryParams(getParamsFromUrl());
@@ -33,7 +29,6 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Оновлюємо URL та стейт без використання react-router-dom
   const updateUrlParams = (newPage: number, newPerPage: number) => {
     const params = new URLSearchParams();
 
@@ -44,11 +39,9 @@ export const App: React.FC = () => {
 
     window.history.pushState({}, '', newUrl);
 
-    // Оновлюємо стейт (використовуємо правильні ключі для TypeScript)
     setQueryParams({ page: newPage, perPage: newPerPage });
   };
 
-  // Обчислюємо індекси для відображення елементів
   const indexOfLastItem = page * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
   const visibleItems = items.slice(indexOfFirstItem, indexOfLastItem);
@@ -59,7 +52,6 @@ export const App: React.FC = () => {
   const handlePerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newPerPage = Number(event.target.value);
 
-    // При зміні кількості елементів завжди скидаємо на 1 сторінку
     updateUrlParams(1, newPerPage);
   };
 
