@@ -1,13 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { getNumbers } from './utils';
 import { Pagination } from './components/Pagination/Pagination';
 
-const items = getNumbers(1, 420).map(n => `Item ${n}`);
+const items = getNumbers(1, 42).map(n => `Item ${n}`);
 
 export const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(5);
+  const getParamsFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    const page = Number(params.get('page')) || 1;
+    const perPage = Number(params.get('perPage')) || 5;
+
+    return { page, perPage };
+  };
+
+  const [{ page: currentPage, perPage }, setQueryParams] =
+    useState(getParamsFromUrl);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setQueryParams(getParamsFromUrl());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const updateUrlParams = (pageValue: number, perPageValue: number) => {
+    const params = new URLSearchParams();
+
+    params.set('page', String(pageValue));
+    params.set('perPage', String(perPageValue));
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+
+    window.history.pushState({}, '', newUrl);
+
+    setQueryParams({ page: pageValue, perPage: perPageValue });
+  };
 
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
@@ -17,12 +48,13 @@ export const App: React.FC = () => {
   const endItemNum = Math.min(indexOfLastItem, items.length);
 
   const handlePerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setPerPage(Number(event.target.value));
-    setCurrentPage(1);
+    const newPerPage = Number(event.target.value);
+
+    updateUrlParams(1, newPerPage);
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlParams(page, perPage);
   };
 
   return (
