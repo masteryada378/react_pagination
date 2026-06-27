@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames';
 import { getNumbers } from '../../utils';
 
 interface Props {
@@ -33,7 +34,7 @@ export const Pagination: React.FC<Props> = ({
 
   return (
     <ul className="pagination">
-      <li className={`page-item ${isFirstPage ? 'disabled' : ''}`}>
+      <li className={classNames('page-item', { disabled: isFirstPage })}>
         <a
           data-cy="prevLink"
           className="page-link"
@@ -48,7 +49,7 @@ export const Pagination: React.FC<Props> = ({
       {pages.map(page => (
         <li
           key={page}
-          className={`page-item ${currentPage === page ? 'active' : ''}`}
+          className={classNames('page-item', { active: currentPage === page })}
         >
           <a
             data-cy="pageLink"
@@ -61,7 +62,7 @@ export const Pagination: React.FC<Props> = ({
         </li>
       ))}
 
-      <li className={`page-item ${isLastPage ? 'disabled' : ''}`}>
+      <li className={classNames('page-item', { disabled: isLastPage })}>
         <a
           data-cy="nextLink"
           className="page-link"
